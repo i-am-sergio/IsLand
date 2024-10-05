@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using UnityEngine;
-
 public class SparkOnCollision : MonoBehaviour
 {
     public ParticleSystem sparks; // Asigna aquí el Particle System de chispas
