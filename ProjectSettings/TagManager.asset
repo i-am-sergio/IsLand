@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - FrictionObject
+  - Caves
+  - Campfires
+  - Fire
   layers:
   - Default
   - TransparentFX

@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class SparkOnCollision : MonoBehaviour
 {
-    public ParticleSystem sparks; // Asigna aquí el Particle System de chispas
+    public ParticleSystem sparks;
+    public bool isSparking = false; // Bool para saber si el objeto está generando chispas
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("FrictionObject")) // Asegúrate de que el otro objeto tenga la etiqueta correcta
+        if (collision.gameObject.CompareTag("FrictionObject"))
         {
-            // Activa las chispas cuando la colisión comienza
             sparks.Play();
+            isSparking = true;
         }
     }
 
@@ -19,9 +20,8 @@ public class SparkOnCollision : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("FrictionObject"))
         {
-            // Detén las chispas cuando termina la colisión
             sparks.Stop();
+            isSparking = false;
         }
     }
 }
-
