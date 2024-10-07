@@ -8,34 +8,58 @@ public class Dormir : MonoBehaviour
     public Animator panelAnimator;
     public string sleepAnimationName = "Sleep";
     public string wakeUpAnimationName = "WakeUp";
-    public Collider playerCollider;
-
-    private FireCampOnTrigger fireCampScript;
-    private Collider sleepZoneCollider;
-    private Collider fireCampCollider;
+    public GameObject player; // Referencia al jugador
+    private PlayerStatus playerStatus;
+    private Collider playerCollider;
+    private List<FireCampOnTrigger> fireCampScripts = new List<FireCampOnTrigger>();
+    private List<Collider> sleepZoneColliders = new List<Collider>();
 
     private void Start()
     {
-        GameObject campiresObject = GameObject.FindGameObjectWithTag("Campfires");
-        if (campiresObject != null)
+        Debug.Log("Dormir script initialized.");
+
+        if (player != null)
         {
-            fireCampScript = campiresObject.GetComponent<FireCampOnTrigger>();
-            fireCampCollider = campiresObject.GetComponent<Collider>();
+            playerStatus = player.GetComponent<PlayerStatus>();
+            playerCollider = player.GetComponent<Collider>();
+        }
+        else
+        {
+            Debug.LogError("Player is not assigned in the inspector!");
         }
 
-        GameObject cavesObject = GameObject.FindGameObjectWithTag("Caves");
-        if (cavesObject != null)
+        GameObject[] campfiresObjects = GameObject.FindGameObjectsWithTag("Campfires");
+        foreach (var campfireObject in campfiresObjects)
         {
-            sleepZoneCollider = cavesObject.GetComponent<Collider>();
+            FireCampOnTrigger fireCampScript = campfireObject.GetComponent<FireCampOnTrigger>();
+            if (fireCampScript != null)
+            {
+                fireCampScripts.Add(fireCampScript);
+            }
+        }
+        if (fireCampScripts.Count == 0)
+        {
+            Debug.LogError("No Campfires found! Check the tag.");
+        }
+
+        GameObject[] cavesObjects = GameObject.FindGameObjectsWithTag("Caves");
+        foreach (var cave in cavesObjects)
+        {
+            var sleepZoneCollider = cave.GetComponent<Collider>();
+            if (sleepZoneCollider != null)
+            {
+                sleepZoneColliders.Add(sleepZoneCollider);
+            }
         }
     }
 
     private void Update()
     {
-        if (fireCampScript != null && timeManager != null && sleepZoneCollider != null && fireCampCollider != null)
+        if (fireCampScripts.Count > 0 && timeManager != null && sleepZoneColliders.Count > 0)
         {
             bool isNight = timeManager.Hours >= 22 || timeManager.Hours < 6;
-            bool isFireOn = fireCampScript.isFireOn;
+            bool isFireOn = IsAnyFireOn();
+
             if (isFireOn && isNight && AreBothColliding())
             {
                 TriggerSleepAnimation();
@@ -43,12 +67,34 @@ public class Dormir : MonoBehaviour
         }
     }
 
+    private bool IsAnyFireOn()
+    {
+        foreach (var fireCampScript in fireCampScripts)
+        {
+            if (fireCampScript.isFireOn)
+                return true;
+        }
+        return false;
+    }
+
     private bool AreBothColliding()
     {
-        bool isPlayerInCave = sleepZoneCollider.bounds.Intersects(playerCollider.bounds);
-        bool isFireInCave = sleepZoneCollider.bounds.Intersects(fireCampCollider.bounds);
-        bool result = isPlayerInCave && isFireInCave;
-        return result;
+        if (playerCollider != null)
+        {
+            foreach (var sleepZoneCollider in sleepZoneColliders)
+            {
+                bool isPlayerInCave = sleepZoneCollider.bounds.Intersects(playerCollider.bounds);
+                foreach (var fireCampScript in fireCampScripts)
+                {
+                    bool isFireInCave = sleepZoneCollider.bounds.Intersects(fireCampScript.GetComponent<Collider>().bounds);
+                    if (isPlayerInCave && isFireInCave)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private void TriggerSleepAnimation()
@@ -56,20 +102,32 @@ public class Dormir : MonoBehaviour
         if (panelAnimator != null)
         {
             panelAnimator.Play(sleepAnimationName);
+
+            if (playerStatus != null)
+            {
+                playerStatus.UpdateSleepPosition(player.transform.position);
+            }
+
             StartCoroutine(WaitAndWakeUp(5f));
         }
     }
 
     private IEnumerator WaitAndWakeUp(float waitTime)
     {
-        yield return new WaitForSeconds(waitTime);
+
         if (timeManager != null)
         {
             timeManager.SetTime(0, 8, 0);
         }
-        if (fireCampScript != null)
+
+        yield return new WaitForSeconds(waitTime);
+
+        foreach (var fireCampScript in fireCampScripts)
         {
-            fireCampScript.ForceStopFire();
+            if (fireCampScript != null)
+            {
+                fireCampScript.ForceStopFire();
+            }
         }
 
         if (panelAnimator != null)

@@ -8,6 +8,8 @@ TagManager:
   - Caves
   - Campfires
   - Fire
+  - Crab
+  - Players
   layers:
   - Default
   - TransparentFX
