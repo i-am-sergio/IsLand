@@ -18,6 +18,8 @@ public class TimeManager : MonoBehaviour
 
     [SerializeField] private float timeSpeed = 1f; // Velocidad del tiempo
 
+    public ParticleSystem rainParticleSystem; // Sistema de partículas para la lluvia
+    public bool statusRain;
     private int minutes;
 
     public int Minutes
@@ -78,6 +80,8 @@ public class TimeManager : MonoBehaviour
         {
             StartCoroutine(LerpSkybox(skyboxNight, skyboxSunrise, 10f));
             StartCoroutine(LerpLight(graddientNightToSunrise, 10f));
+            rainParticleSystem.Stop(); // Detener la lluvia en el amanecer
+            statusRain = false;
         }
         else if (value == 8)
         {
@@ -93,6 +97,8 @@ public class TimeManager : MonoBehaviour
         {
             StartCoroutine(LerpSkybox(skyboxSunset, skyboxNight, 10f));
             StartCoroutine(LerpLight(graddientSunsetToNight, 10f));
+            rainParticleSystem.Play(); // Iniciar la lluvia por la noche
+            statusRain = true;
         }
     }
 
