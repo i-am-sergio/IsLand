@@ -21,6 +21,8 @@ public class TimeManager : MonoBehaviour
     public ParticleSystem rainParticleSystem; // Sistema de partículas para la lluvia
     public bool statusRain;
     private int minutes;
+    public int initialHour = 6;   // Define la hora inicial
+    public int initialMinute = 0; // Define los minutos iniciales
 
     public int Minutes
     {
@@ -46,6 +48,13 @@ public class TimeManager : MonoBehaviour
 
     private float tempSecond;
 
+    void Start()
+    {
+        Hours = initialHour;
+        Minutes = initialMinute;
+        OnMinutesChange(Minutes);
+        OnHoursChange(Hours);
+    }
     public void Update()
     {
         tempSecond += Time.deltaTime * timeSpeed; // Ajuste de la velocidad del tiempo

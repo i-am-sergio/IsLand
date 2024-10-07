@@ -29,6 +29,7 @@ public class Health : MonoBehaviour
         Debug.Log(gameObject.name + " ha recibido " + damage + " de daño. Salud restante: " + health);
         if (dangerPanel != null)
         {
+            Debug.Log("Despliege de Danger");
             dangerPanel.SetActive(true);
             StartCoroutine(ShakeScreen());
         }
